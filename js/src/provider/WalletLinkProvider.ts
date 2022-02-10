@@ -612,7 +612,7 @@ export class WalletLinkProvider
   }
 
   private async _handleAsynchronousMethods(
-    request: JSONRPCRequest
+    request: JSONRPCRequest<any>
   ): Promise<JSONRPCResponse | void> {
     const { method } = request
     const params = request.params || []
@@ -665,7 +665,6 @@ export class WalletLinkProvider
         return this._wallet_switchEthereumChain(params)
 
       case JSONRPCMethod.wallet_watchAsset:
-        console.log("WATCH ASSET CALLED CHANGED")
         return this._wallet_watchAsset(params)
     }
 
@@ -1092,17 +1091,20 @@ export class WalletLinkProvider
     return { jsonrpc: "2.0", id: 0, result: null }
   }
 
-  private async _wallet_watchAsset(
-    params: unknown[]
-  ): Promise<JSONRPCResponse> {
-    console.log("_wallet_watchAsset", { params })
-
-    const request = params[0] as WatchAssetParams
+  private async _wallet_watchAsset(params: unknown): Promise<JSONRPCResponse> {
+    const request = params as WatchAssetParams
 
     if (request.type?.length === 0) {
       throw ethErrors.provider.custom({
         code: 0,
         message: "type is a required field"
+      })
+    }
+
+    if (request.type !== "ERC20") {
+      throw ethErrors.provider.custom({
+        code: 0,
+        message: `Asset of type '${request.type}' not supported`
       })
     }
 
@@ -1116,7 +1118,7 @@ export class WalletLinkProvider
     if (!request.options.address) {
       throw ethErrors.provider.custom({
         code: 0,
-        message: "address is a required option"
+        message: "option address is a required option"
       })
     }
 

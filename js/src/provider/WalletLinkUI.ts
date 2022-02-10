@@ -128,6 +128,12 @@ export abstract class WalletLinkUI {
   abstract inlineAddEthereumChain(chainId: string): boolean
 
   /**
+   * If the extension is available, it can handle the watch asset request without
+   * having to send a request over walletlink
+   */
+  abstract inlineWatchAsset(): boolean
+
+  /**
    * If the extension is available, it can handle the switch ethereum chain request without
    * having to send a request over walletlink
    */

@@ -204,6 +204,10 @@ export class WalletLinkSdkUI extends WalletLinkUI {
     return false
   }
 
+  inlineWatchAsset(): boolean {
+    return false
+  }
+
   inlineSwitchEthereumChain(): boolean {
     return false
   }

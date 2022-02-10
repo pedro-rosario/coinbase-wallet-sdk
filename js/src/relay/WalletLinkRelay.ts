@@ -65,6 +65,7 @@ import {
   SignEthereumTransactionResponse,
   SubmitEthereumTransactionResponse,
   SwitchEthereumChainResponse,
+  WatchAssetReponse,
   WatchAssetResponse,
   Web3Response
 } from "./Web3Response"
@@ -812,21 +813,82 @@ export class WalletLinkRelay extends WalletLinkRelayAbstract {
     decimals?: number,
     image?: string
   ): CancelablePromise<WatchAssetResponse> {
-    console.log("RELAY WATCH ASSET CALLED")
-    console.log({ type, address, symbol, decimals, image })
-    const cancel = () => null
-    const promise = new Promise<WatchAssetResponse>(resolve => {
+    const request: Web3Request = {
+      method: Web3Method.watchAsset,
+      params: {
+        type,
+        options: {
+          address,
+          symbol,
+          decimals,
+          image
+        }
+      }
+    }
+
+    let hideSnackbarItem: (() => void) | null = null
+    const id = randomBytesHex(8)
+
+    const cancel = () => {
+      this.publishWeb3RequestCanceledEvent(id)
+      this.handleWeb3ResponseMessage(
+        Web3ResponseMessage({
+          id,
+          response: ErrorResponse(request.method, "User rejected request")
+        })
+      )
+      hideSnackbarItem?.()
+    }
+
+    if (!this.ui.inlineWatchAsset()) {
+      hideSnackbarItem = this.ui.showConnecting({
+        isUnlinkedErrorState: this.isUnlinkedErrorState,
+        onCancel: cancel,
+        onResetConnection: this.resetAndReload // eslint-disable-line @typescript-eslint/unbound-method
+      })
+    }
+
+    const promise = new Promise<WatchAssetResponse>((resolve, reject) => {
+      this.relayEventManager.callbacks.set(id, response => {
+        hideSnackbarItem?.()
+
+        if (response.errorMessage) {
+          return reject(new Error(response.errorMessage))
+        }
+        resolve(response as WatchAssetResponse)
+      })
+
+      const _cancel = () => {
+        this.handleWeb3ResponseMessage(
+          Web3ResponseMessage({
+            id,
+            response: WatchAssetReponse(false)
+          })
+        )
+      }
+
+      const approve = () => {
+        this.handleWeb3ResponseMessage(
+          Web3ResponseMessage({
+            id,
+            response: WatchAssetReponse(true)
+          })
+        )
+      }
+
+      this.ui.watchAsset({
+        onApprove: approve,
+        onCancel: _cancel,
+        type,
+        address,
+        symbol,
+        decimals,
+        image
+      })
+
       resolve({ method: Web3Method.watchAsset, result: true })
     })
-    this.ui.watchAsset({
-      onApprove: () => null,
-      onCancel: () => null,
-      type,
-      address,
-      symbol,
-      decimals,
-      image
-    })
+
     return { cancel, promise }
   }
 
