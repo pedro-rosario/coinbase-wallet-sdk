@@ -27,6 +27,7 @@ export enum JSONRPCMethod {
   walletlink_arbitrary = "walletlink_arbitrary",
   wallet_addEthereumChain = "wallet_addEthereumChain",
   wallet_switchEthereumChain = "wallet_switchEthereumChain",
+  wallet_watchAsset = "wallet_watchAsset",
 
   // asynchronous pub/sub
   eth_subscribe = "eth_subscribe",

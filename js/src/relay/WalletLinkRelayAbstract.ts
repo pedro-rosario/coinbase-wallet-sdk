@@ -15,6 +15,7 @@ import {
   SignEthereumTransactionResponse,
   SubmitEthereumTransactionResponse,
   SwitchEthereumChainResponse,
+  WatchAssetResponse,
   Web3Response
 } from "./Web3Response"
 
@@ -44,6 +45,14 @@ export abstract class WalletLinkRelayAbstract {
       decimals: number
     }
   ): CancelablePromise<AddEthereumChainResponse>
+
+  abstract watchAsset(
+    type: string,
+    address: string,
+    symbol?: string,
+    decimals?: number,
+    image?: string
+  ): CancelablePromise<WatchAssetResponse>
 
   abstract switchEthereumChain(
     chainId: string

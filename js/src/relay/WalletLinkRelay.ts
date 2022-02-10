@@ -65,6 +65,7 @@ import {
   SignEthereumTransactionResponse,
   SubmitEthereumTransactionResponse,
   SwitchEthereumChainResponse,
+  WatchAssetResponse,
   Web3Response
 } from "./Web3Response"
 import {
@@ -802,6 +803,31 @@ export class WalletLinkRelay extends WalletLinkRelayAbstract {
     )
 
     return { promise, cancel }
+  }
+
+  watchAsset(
+    type: string,
+    address: string,
+    symbol?: string,
+    decimals?: number,
+    image?: string
+  ): CancelablePromise<WatchAssetResponse> {
+    console.log("RELAY WATCH ASSET CALLED")
+    console.log({ type, address, symbol, decimals, image })
+    const cancel = () => null
+    const promise = new Promise<WatchAssetResponse>(resolve => {
+      resolve({ method: Web3Method.watchAsset, result: true })
+    })
+    this.ui.watchAsset({
+      onApprove: () => null,
+      onCancel: () => null,
+      type,
+      address,
+      symbol,
+      decimals,
+      image
+    })
+    return { cancel, promise }
   }
 
   addEthereumChain(
